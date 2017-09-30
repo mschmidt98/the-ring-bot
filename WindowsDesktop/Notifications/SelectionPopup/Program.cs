@@ -44,7 +44,6 @@ namespace SelectionPopup
                 return;
 
             Application.Run(new Form1(AktBild));
-            
         }
         static void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
@@ -55,6 +54,7 @@ namespace SelectionPopup
 
             if (e.Topic.Equals("/theringbot/ring"))
             {
+                IsAntwortMoeglich = false;
                 NotifyMeSempai("Benachrichtigung:", TranslateContent(MessageContent));
             }
             if(e.Topic.Equals("/theringbot/pic"))
@@ -65,7 +65,6 @@ namespace SelectionPopup
                 File.WriteAllBytes(AktBild, bytes);
                 
                 NotifyMeSempai("Benachrichtigung:", "Es klingelt!", Path.GetFullPath(AktBild));
-
             }
         }
 
@@ -83,24 +82,29 @@ namespace SelectionPopup
         static public string TranslateContent(string eingabe)
         {
             if (eingabe.Equals("k") || eingabe.Equals("K"))
-            {
-                IsAntwortMoeglich = true;
                 return "Es klingelt";
-            }
             else if (eingabe.Equals("o") || eingabe.Equals("O"))
-            {
-                IsAntwortMoeglich = false;
                 return "Jemand ist Unterwegs";
-            }
             else if (eingabe.Equals("n") || eingabe.Equals("N"))
-            {
-                IsAntwortMoeglich = false;
                 return "Jemand hat Abgelehnt";
-            }
             else
-            {
                 return "ERROR";
-            }
+        }
+
+        public static void SendToMQTT(string antwort)
+        {
+
+            MqttClient Client = new MqttClient("172.16.0.1");
+
+            // register to message received 
+            Client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
+
+            Client.Connect("WinNotification");
+
+            var response = System.Text.Encoding.UTF8.GetBytes(antwort);
+            Client.Publish("/theringbot/ring", response);
+
+            Client.Subscribe(new string[] { "/theringbot/ring", "/theringbot/pic" }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
         }
     }
 }
