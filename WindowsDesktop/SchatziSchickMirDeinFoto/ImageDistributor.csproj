@@ -11,8 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Laggson.Common">
-      <HintPath>..\..\Notifications\References\Laggson.Common.dll</HintPath>
+      <HintPath>..\packages\Laggson.Common.dll</HintPath>
     </Reference>
   </ItemGroup>
 

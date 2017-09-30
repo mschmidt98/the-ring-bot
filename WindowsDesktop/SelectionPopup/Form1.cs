@@ -33,16 +33,19 @@ namespace SelectionPopup
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-           
+         
         }
 
         private void Btn_Komme_Click(object sender, EventArgs e)
         {
+            Program.SendToMQTT("o");
             this.Close();
         }
 
+
         private void Btn_Nein_Click(object sender, EventArgs e)
         {
+            Program.SendToMQTT("n");
             this.Close();
         }
 
