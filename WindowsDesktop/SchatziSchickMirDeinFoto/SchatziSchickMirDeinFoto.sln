@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageDistributor", "ImageDistributor\ImageDistributor.csproj", "{56317C1D-9610-4D15-92A1-7FFC740D5EDC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{56317C1D-9610-4D15-92A1-7FFC740D5EDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56317C1D-9610-4D15-92A1-7FFC740D5EDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56317C1D-9610-4D15-92A1-7FFC740D5EDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56317C1D-9610-4D15-92A1-7FFC740D5EDC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4F970553-9403-4C73-A906-0355A4C22BCA}
+	EndGlobalSection
+EndGlobal
