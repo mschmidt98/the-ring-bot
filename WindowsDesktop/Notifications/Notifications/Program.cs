@@ -1,7 +1,5 @@
 ﻿using Laggson.Common.Notifications;
 using uPLibrary.Networking.M2Mqtt;
-using System;
-using System.Net;
 using uPLibrary.Networking.M2Mqtt.Messages;
 
 namespace Notifications
@@ -10,35 +8,44 @@ namespace Notifications
     {
         static void Main(string[] args)
         {
-            IPAddress IP = IPAddress.Parse("172.16.0.1");
+            ToastNotifier.Init("The RingBot");
+            Subscribe();
+        }
 
-            MqttClient Client = new MqttClient(IP);
+        /// <summary>
+        /// Aboniert den MQTT-Service, sodass <see cref="Client_MqttMsgPublishReceived(object, MqttMsgPublishEventArgs)"/>
+        /// aufgerufen wird, wenn eine Nachricht eintrifft.
+        /// </summary>
+        private static void Subscribe()
+        {
+            string serverIp = "172.16.0.1";
+            MqttClient Client = new MqttClient(serverIp);
 
             // register to message received 
-            Client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
+            Client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
+            Client.Connect("DesktopNotification");
 
-            Client.Connect(Guid.NewGuid().ToString());
-
-            if(Client.IsConnected)
-                NotifyMeSempai("Verbindung", "erfolgreich");
-            else
+            if (!Client.IsConnected)
                 NotifyMeSempai("Verbindung", "fehlgeschlagen");
 
             Client.Subscribe(new string[] { "/theringbot/ring" }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
         }
 
+        /// <summary>
+        /// Zeigt die angegebene Nachricht als Windows-Toast an.
+        /// </summary>
+        /// <param name="ueberschrift">Die Überschrift der Meldung.</param>
+        /// <param name="inhalt">Der Inhalt der Meldung.</param>
         static public void NotifyMeSempai(string ueberschrift, string inhalt)
         {
-            ToastNotifier.Init("Meine Anwendung");
-
             var message = new MessageItem(ueberschrift, inhalt);
             ToastNotifier.Show(message);
         }
 
-        static void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
+        static void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
-            var MessageContent = System.Text.Encoding.Default.GetString(e.Message);
-            NotifyMeSempai("Klingelt!:", MessageContent);
+            var msg = System.Text.Encoding.UTF8.GetString(e.Message);
+            NotifyMeSempai("Nachricht:", msg);
         }
     }
 }
