@@ -34,8 +34,8 @@ regristrierteClients = [101142135]
 bot = None
 client = None
 mgttServer = ""
-ringTopic = "/theringbot/test"
-openingTopic = "/theringbot/o"
+ringTopic = "/theringbot/ring"
+openingTopic = "/theringbot/opening"
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
@@ -53,10 +53,11 @@ def config(bot, update):
     update.message.reply_text('Config Setup started...')
     bot.send_message(chat_id=update.message.chat_id, text=str("Wie heißt der MQTT Server?"))    
     
-
+#Fragt ob man eine Benachrichtigung bekommmen will
 def status(bot, update):
     reply_keyboard = [['Ich bin zuhause', 'Ich bin unterwegs', 'Ich will nicht gestört werden']]
     update.message.reply_text('Wie ist dein aktueller Status?', reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+
 
 #Reagieren auf Usereingabe
 def write(bot, update):
@@ -73,11 +74,11 @@ def write(bot, update):
             regristrierteClients.remove(update.message.chat_id)
         update.message.reply_text("Du wirst nun nicht mehr benachrichtigt wenn es klingelt")
     elif update.message.text == 'Öffne die Tür':
-        client.publish("/theringbot/o", "t:" + update.message.from_user.first_name)
+        client.publish(openingTopic, "t:" + str(update.message.chat_id) + ":" + update.message.from_user.first_name)
         print("Tür wird geöffnet") 
     elif update.message.text == 'Ich kann die Tür gerade nicht aufmachen':
-        client.publish("/theringbot/o", "a:" + update.message.from_user.first_name)
-        #Nachricht bei allen außer bei dir anzeigen Liste temporär verkürzen  
+        client.publish(openingTopic, "a:" + str(update.message.chat_id) + ":" + update.message.from_user.first_name)
+
     print(regristrierteClients)  
 
 
@@ -88,26 +89,34 @@ def on_message(client, userdata, msg):
         ring(client, userdata, msg)
     elif msg.topic == openingTopic:
         openDoor(client, userdata, msg)
-    
-    for chat_id in regristrierteClients:
-        bot.send_message(chat_id=chat_id, text=ChatNachricht)
-        reply_keyboard = [['Öffne die Tür', 'Ich kann die Tür gerade nicht aufmachen', 'Keine Reaktion']]
-        bot.send_message(chat_id=chat_id, text='Was soll ich tun?', reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+
 
 def ring(client, userdata, msg):
     global ChatNachricht
     if len(regristrierteClients) > 0:
-        if str(msg.payload.decode("ascii") == "k"):
+        if str(msg.payload.decode("ascii")[0] == 'k'):
             ChatNachricht = "Es hat an der Tür geklingelt"
+            for chat_id in regristrierteClients:
+                bot.send_message(chat_id=chat_id, text=ChatNachricht)
+                reply_keyboard = [['Öffne die Tür', 'Ich kann die Tür gerade nicht aufmachen', 'Keine Reaktion']]
+                bot.send_message(chat_id=chat_id, text='Was soll ich tun?', reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
 
 def openDoor(client, userdata, msg):
-    global ChatNachricht 
-    if str(msg.payload.decode("ascii") == "t"):
-        ChatNachricht = "Die Tür wird geöffnet"
-    elif str(msg.payload.decode("ascii") == "a"):
-        ChatNachricht = "Jemand anders kann die Tür gerade nicht öffnen"
+    message = msg.payload.decode("ascii").split(':')
+
+    if str(message[0]) == 't':
+        ChatNachricht = "Die Tür wird von " + message[2] +" geöffnet"
+    elif str(message[0]) == 'a':
+        ChatNachricht = message[2] + " kann die Tür nicht öffnen"
+
+    for chat_id in regristrierteClients:
+        if int(message[1]) == chat_id:
+            bot.send_message(chat_id=chat_id, text="Nachricht wurde an die anderen Mitbewohner gesendet")
+        else:
+            bot.send_message(chat_id=chat_id, text=ChatNachricht)
         
+
 def error(bot, update, error):
     logger.warn('Update "%s" caused error "%s"' % (update, error))
 
