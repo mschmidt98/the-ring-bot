@@ -28,7 +28,7 @@ namespace SelectionPopup
             MqttClient Client = new MqttClient("172.16.0.1");
 
             // register to message received 
-            Client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
+            Client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
 
             Client.Connect("WinNotification");
 
@@ -45,7 +45,7 @@ namespace SelectionPopup
 
             Application.Run(new Form1(AktBild));
         }
-        static void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
+        static void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
             AktBild = "";
             var MessageContent = System.Text.Encoding.Default.GetString(e.Message);
@@ -97,7 +97,7 @@ namespace SelectionPopup
             MqttClient Client = new MqttClient("172.16.0.1");
 
             // register to message received 
-            Client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
+            Client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
 
             Client.Connect("WinNotification");
 
