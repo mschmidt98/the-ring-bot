@@ -30,12 +30,14 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 
-regristrierteClients = [101142135]
+regristrierteClients = []
 bot = None
 client = None
 mgttServer = ""
 ringTopic = "/theringbot/ring"
 openingTopic = "/theringbot/opening"
+picTopic = "/theringbot/pic"
+config = {"mqttip" : "172.16.0.1", "ringchannel" : "/theringbot/ring", "statuschannel" : "/theringbot/opening", "picchannel" : "/theringbot/pic"}
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
@@ -46,13 +48,12 @@ def start(bot, update):
 
 def help(bot, update):
     update.message.reply_text('Help!')
-   
-
-def config(bot, update):
-    global mqttServer
-    update.message.reply_text('Config Setup started...')
-    bot.send_message(chat_id=update.message.chat_id, text=str("Wie heißt der MQTT Server?"))    
+    update.message.reply_text("/mqttip      Setzt die IP für deinen MQTT-Server fest")
+    update.message.reply_text("/ringchannel     Setzt den Channel auf dem MQTT-Server für alle Infos zum Klingeln und Status zum Klingeln")
+    update.message.reply_text("/statuschannel      Setzt den Channel auf dem MQTT-Server fest für alle Infos zum Status der Tür")
+    update.message.reply_text("/picchannel      Setzt den Channel auf dem MQTT-Server auf dem das Bild der Kamera liegt")  
     
+
 #Fragt ob man eine Benachrichtigung bekommmen will
 def status(bot, update):
     reply_keyboard = [['Ich bin zuhause', 'Ich bin unterwegs', 'Ich will nicht gestört werden']]
@@ -78,6 +79,14 @@ def write(bot, update):
         print("Tür wird geöffnet") 
     elif update.message.text == 'Ich kann die Tür gerade nicht aufmachen':
         client.publish(openingTopic, "a:" + str(update.message.chat_id) + ":" + update.message.from_user.first_name)
+    elif "/mqttip" in update.message.text:
+        mqttip(bot, update)
+    elif "/ringchanel" in update.message.text:
+        ringchannel(bot, update)
+    elif "/statuschannel" in update.message.text:
+        statuschannel(bot, update)
+    elif "/picchannel" in update.message.text:
+        picchannel(bot, update)
 
     print(regristrierteClients)  
 
@@ -104,18 +113,51 @@ def ring(client, userdata, msg):
 
 def openDoor(client, userdata, msg):
     message = msg.payload.decode("ascii").split(':')
+    if len(message)>1:
+        if str(message[0]) == 't':
+            ChatNachricht = "Die Tür wird von " + message[2] +" geöffnet"
+        elif str(message[0]) == 'a':
+            ChatNachricht = message[2] + " kann die Tür nicht öffnen"
 
-    if str(message[0]) == 't':
-        ChatNachricht = "Die Tür wird von " + message[2] +" geöffnet"
-    elif str(message[0]) == 'a':
-        ChatNachricht = message[2] + " kann die Tür nicht öffnen"
-
-    for chat_id in regristrierteClients:
-        if int(message[1]) == chat_id:
-            bot.send_message(chat_id=chat_id, text="Nachricht wurde an die anderen Mitbewohner gesendet")
-        else:
-            bot.send_message(chat_id=chat_id, text=ChatNachricht)
+        for chat_id in regristrierteClients:
+            if int(message[1]) == chat_id:
+                bot.send_message(chat_id=chat_id, text="Nachricht wurde an die anderen Mitbewohner gesendet")
+            else:
+                bot.send_message(chat_id=chat_id, text=ChatNachricht)
         
+#def sendpic():
+
+def listconfig(bot, update):
+    global config
+    for key in config:
+        print(key, config[key])
+       
+
+    
+
+def mqttip(bot, update):
+    global config
+    eingabe = update.message.text.split(" ")
+    config["mqttip"] = eingabe
+
+
+def ringchannel(bot, update):
+    global config
+    eingabe = update.message.text.split(" ")
+    config["ringchannel"] = eingabe
+
+
+def statuschannel(bot, update):
+    global config
+    eingabe = update.message.text.split(" ")
+    config["statuschannel"] = eingabe
+
+
+def picchannel(bot, update):
+    global config
+    eingabe = update.message.text.split(" ")
+    config["picchannel"] = eingabe
+
 
 def error(bot, update, error):
     logger.warn('Update "%s" caused error "%s"' % (update, error))
@@ -130,6 +172,7 @@ def on_connect(client, userdata, flags, rc):
 
 def main():
     global bot, client
+
     # Create the EventHandler and pass it your bot's token.
     updater = Updater("479238432:AAH16mDXaHlnqa0lwog398OePSvL-ouEdb0")
     bot = updater.bot
@@ -139,8 +182,12 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start",  start))
     dp.add_handler(CommandHandler("help",   help))
-    dp.add_handler(CommandHandler("config", config))
     dp.add_handler(CommandHandler("status", status))
+    dp.add_handler(CommandHandler("mqttip", status))
+    dp.add_handler(CommandHandler("ringchannel", status))
+    dp.add_handler(CommandHandler("statuschannel", status))
+    dp.add_handler(CommandHandler("picchannel", status))
+    dp.add_handler(CommandHandler("listconfig", listconfig))
     dp.add_handler(MessageHandler(Filters.text, write))
 
     # log all errors

@@ -1,12 +1,12 @@
-﻿using Foto.Lib;
+﻿using System;
 
-namespace Foto.Executor
+namespace ImageDistributor
 {
     class Program
     {
         static void Main(string[] args)
         {
-            ImageHelper i = new ImageHelper();
+            new ImageHelper();
         }
     }
 }
