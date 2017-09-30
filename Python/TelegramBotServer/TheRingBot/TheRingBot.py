@@ -44,8 +44,8 @@ config = {"mqttip" : "172.16.0.1", "ringchannel" : "/theringbot/ring", "statusch
 def start(bot, update):
     update.message.reply_text('Hi')
     regristrierteClients.append(update.message.chat_id)
-    
 
+    
 def help(bot, update):
     update.message.reply_text('Help!')
     update.message.reply_text("/mqttip      Setzt die IP für deinen MQTT-Server fest")
@@ -129,11 +129,10 @@ def openDoor(client, userdata, msg):
 
 def listconfig(bot, update):
     global config
-    for key in config:
-        print(key, config[key])
-       
-
-    
+    strings = (str(key) + " : " + str(value) for key,value in config.items())
+    text = "\n".join(strings)
+    update.message.reply_text(text)
+        
 
 def mqttip(bot, update):
     global config
