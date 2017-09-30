@@ -1,6 +1,7 @@
 #include <PubSubClient.h>
 
-/*  ___   ___  ___  _   _  ___   ___   ____ ___  ____  
+/*  
+ *  ___   ___  ___  _   _  ___   ___   ____ ___  ____  
  * / _ \ /___)/ _ \| | | |/ _ \ / _ \ / ___) _ \|    \ 
  *| |_| |___ | |_| | |_| | |_| | |_| ( (__| |_| | | | |
  * \___/(___/ \___/ \__  |\___/ \___(_)____)___/|_|_|_|
@@ -8,9 +9,16 @@
  *  NodeMCU采集到的tilt传感器电压值发到MQTT Client
  * Tutorial URL 
  * CopyRight John Yu
+ * 
+ * Tutorial: http://kookye.com/2016/12/13/use-nodemcu-to-send-push-button-signal-to-remote-mqtt-client/
+ * 
+ *  weitergepfuscht M.Schmidt
+ *
  */
+
+
+ 
 #include <ESP8266WiFi.h>
-#include "/home/smarkus/Arduino/libraries/pubsubclient/src/PubSubClient.h"
 
 int BUTTON_PIN = 5; 
 const char* ssid = "Forum";
@@ -20,7 +28,6 @@ const char* mqtt_server = "172.16.0.1";
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastMsg = 0;
-char msg[50];
 int lastStatus = 0;
 
 void setup_wifi() {
@@ -43,7 +50,8 @@ void setup_wifi() {
 
 void callback(char* topic, byte* payload, unsigned int length) 
 {
-  
+
+  delay(200);
 } //end callback
 
 void reconnect() {
@@ -61,7 +69,7 @@ void reconnect() {
     {
       Serial.println("connected");
      //once connected to MQTT broker, subscribe command if any
-     // client.subscribe("OsoyooCommand");
+     // client.subscribe("/theringbot/ring");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -81,6 +89,8 @@ void setup() {
   pinMode(BUTTON_PIN,INPUT);
 }
 
+long lastActive = 0;
+
 void loop() {
   if (!client.connected()) {
     reconnect();
@@ -93,16 +103,25 @@ void loop() {
   if (now - lastMsg > 50) {
      lastMsg = now;
      status=digitalRead(BUTTON_PIN);
-     String msg="K";
+     
      if(status==HIGH )
      {
-          char message[1];
-          msg.toCharArray(message,58);
-          Serial.println(message);
           
-          if(lastStatus==0){
-            //publish sensor data to MQTT broker
-            client.publish("/theringbot/ring", message);
+          if(lastStatus==0 ){
+            
+            char message[2];
+            message[1] = 0;
+            
+            if(now-lastActive > 10*1000 ){
+              
+              message[0] = 'k';
+              Serial.println(message);
+              
+              //publish sensor data to MQTT broker
+              client.publish("/theringbot/ring", message);
+              lastActive = now;
+            }
+          
           }
           
           lastStatus = 1;
