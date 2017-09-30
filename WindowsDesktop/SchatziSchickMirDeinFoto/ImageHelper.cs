@@ -40,7 +40,7 @@ namespace ImageDistributor
             string serverIp = "172.16.0.1";
             var ringClient = new MqttClient(serverIp);
 
-            if(topic == "pic")
+            if (topic == "pic")
             {
                 ringClient.Connect("SchatziIchSchickDirMeinFoto");
             }
@@ -51,7 +51,7 @@ namespace ImageDistributor
                 ringClient.Subscribe(new string[] { "/theringbot/" + topic }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
             }
 
-            if(!ringClient.IsConnected)
+            if (!ringClient.IsConnected)
                 NotifyMeSempai("Fehler", "Verbindung fehlgeschlagen.");
 
 
@@ -63,9 +63,9 @@ namespace ImageDistributor
         /// </summary>
         /// <param name="ueberschrift">Die Überschrift der Meldung.</param>
         /// <param name="inhalt">Der Inhalt der Meldung.</param>
-        private void NotifyMeSempai(string ueberschrift, string inhalt)
+        private void NotifyMeSempai(string ueberschrift, string inhalt, string imagePath = null)
         {
-            var message = new MessageItem(ueberschrift, inhalt);
+            var message = new MessageItem(ueberschrift, inhalt, "", imagePath);
             ToastNotifier.Show(message);
         }
 
@@ -75,7 +75,6 @@ namespace ImageDistributor
             if (message != "k")
                 return;
 
-            NotifyMeSempai("Nachricht erhalten", "Klingel-Nachricht angekommen.");
             var response = GetLatestImageBytes();
             PicClient.Publish("/theringbot/pic", response);
         }
@@ -101,18 +100,17 @@ namespace ImageDistributor
 
                 var tempPath = Environment.GetEnvironmentVariable("tmp") + "\\LatestCamImg.jpg";
                 cl.DownloadFile(path, tempPath);
+                NotifyMeSempai("Nachricht erhalten", "Klingel-Nachricht angekommen.", tempPath);
 
                 var image = ImagePathToBase64(tempPath);
                 var bytes = System.Text.Encoding.UTF8.GetBytes(image);
 
-                //var desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Test.txt";
-                //File.WriteAllBytes(desktop, bytes);
                 return bytes;
             }
             catch (Exception e)
             {
                 Console.WriteLine("Fehler: " + e);
-                    return null;
+                return null;
             }
         }
 
@@ -141,7 +139,7 @@ namespace ImageDistributor
                 var nameArray = names.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
                 Array.Sort(nameArray);
 
-                return ftpAddress + nameArray[nameArray.Length -1];
+                return ftpAddress + nameArray[nameArray.Length - 1];
             }
             catch (Exception e)
             {

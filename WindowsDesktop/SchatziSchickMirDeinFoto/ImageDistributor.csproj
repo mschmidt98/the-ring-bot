@@ -16,4 +16,8 @@
     </Reference>
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if $(ConfigurationName) == Release (&#xD;&#xA;cd $(SolutionDir)&#xD;&#xA;CopyBuildFiles.bat&#xD;&#xA;)" />
+  </Target>
+
 </Project>
