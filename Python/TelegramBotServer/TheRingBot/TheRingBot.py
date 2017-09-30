@@ -122,9 +122,7 @@ def openDoor(client, userdata, msg):
         if len(message)>1:
             ChatNachricht = "Die Tür wird von " + message[2] +" geöffnet"
         else:
-            ChatNachricht = "Die Tür wird geöffnet"
-        
-            
+            ChatNachricht = "Die Tür wird geöffnet"            
     elif str(message[0]) == 'a':
         ChatNachricht = message[2] + " kann die Tür nicht öffnen"
     elif str(message[0]) == 'o' :
@@ -133,11 +131,11 @@ def openDoor(client, userdata, msg):
         ChatNachricht = "Tür ist geschlossen"
 
 
-        for chat_id in regristrierteClients:
-            if int(message[1]) == chat_id:
-                bot.send_message(chat_id=chat_id, text="Nachricht wurde an die anderen Mitbewohner gesendet")
-            else:
-                bot.send_message(chat_id=chat_id, text=ChatNachricht)
+    for chat_id in regristrierteClients:
+        if str(message[0]) == 't' and len(message)>1 and (message[1]) == chat_id :
+            bot.send_message(chat_id=chat_id, text="Nachricht wurde an die anderen Mitbewohner gesendet")
+        else:
+            bot.send_message(chat_id=chat_id, text=ChatNachricht)
         
 
 def sendpic(client, userdata, msg):
