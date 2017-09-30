@@ -1,47 +1,61 @@
 ﻿using Laggson.Common.Notifications;
 using System;
-using System.Drawing;
-using System.Drawing.Imaging;
+using System.DrawingCore;
+using System.DrawingCore.Imaging;
 using System.IO;
-using System.Linq;
 using System.Net;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 
-namespace Foto.Lib
+namespace ImageDistributor
 {
     public class ImageHelper
     {
-        private MqttClient Client { get; set; }
+        private MqttClient RingClient { get; }
+        private MqttClient PicClient { get; }
 
         public ImageHelper()
         {
-            Subscribe();
+            string title = "Der Foto-Verschick-O-Mat";
+            ToastNotifier.Init(title);
+            Console.Title = title;
 
-#if DEBUG
-            GetLatestImageBytes();
+            RingClient = CreateClient("ring");
+            PicClient = CreateClient("pic");
 
-            Client.Disconnect();
-#endif
+            Console.WriteLine("Zum Beenden drücken Sie die Enter-Taste...");
+            Console.ReadLine();
+
+            RingClient.Disconnect();
+            PicClient.Disconnect();
         }
 
         /// <summary>
-        /// Aboniert den MQTT-Service, sodass <see cref="Client_MqttMsgPublishReceived(object, MqttMsgPublishEventArgs)"/>
-        /// aufgerufen wird, wenn eine Nachricht eintrifft.
+        /// 
         /// </summary>
-        private void Subscribe()
+        /// <param name="transmit">Wenn false, wird für receive erstellt.</param>
+        /// <returns></returns>
+        private MqttClient CreateClient(string topic)
         {
             string serverIp = "172.16.0.1";
-            Client = new MqttClient(serverIp);
+            var ringClient = new MqttClient(serverIp);
 
-            // register to message received 
-            Client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
-            Client.Connect("SchatziSchickMirEinFoto");
+            if(topic == "pic")
+            {
+                ringClient.Connect("SchatziIchSchickDirMeinFoto");
+            }
+            else
+            {
+                ringClient.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
+                ringClient.Connect("SchatziSchickMirEinFoto");
+                ringClient.Subscribe(new string[] { "/theringbot/" + topic }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+            }
 
-            if (!Client.IsConnected)
+            if(!ringClient.IsConnected)
                 NotifyMeSempai("Fehler", "Verbindung fehlgeschlagen.");
 
-            Client.Subscribe(new string[] { "/theringbot/ring" }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+
+            return ringClient;
         }
 
         /// <summary>
@@ -60,9 +74,10 @@ namespace Foto.Lib
             var message = System.Text.Encoding.UTF8.GetString(e.Message);
             if (message != "k")
                 return;
-            
+
+            NotifyMeSempai("Nachricht erhalten", "Klingel-Nachricht angekommen.");
             var response = GetLatestImageBytes();
-            Client.Publish("/theringbot/pic", response);
+            PicClient.Publish("/theringbot/pic", response);
         }
 
         /// <summary>
@@ -90,8 +105,8 @@ namespace Foto.Lib
                 var image = ImagePathToBase64(tempPath);
                 var bytes = System.Text.Encoding.UTF8.GetBytes(image);
 
-                var desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Test.txt";
-                File.WriteAllBytes(desktop, bytes);
+                //var desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Test.txt";
+                //File.WriteAllBytes(desktop, bytes);
                 return bytes;
             }
             catch (Exception e)
