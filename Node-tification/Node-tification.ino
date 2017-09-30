@@ -1,3 +1,5 @@
+#include <Adafruit_NeoPixel.h>
+
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
@@ -8,6 +10,7 @@ const int buzzer1 = 13; //D7
 const int buzzer2 = 15; //D8
 WiFiClient espClient;
 PubSubClient client(espClient);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(8, 12, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   delay(1000);
@@ -23,7 +26,8 @@ void setup() {
   analogWrite(led_R, 0);
   analogWrite(led_G, 0);
   analogWrite(led_B, 0);
-
+  strip.begin();
+  strip.show();
   //verbinden mit Access Point
   Serial.println();
   Serial.print("\nVerbinden");
@@ -64,28 +68,34 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
   if((char)payload[0] == 'k') {
-    led_flash(0, 0, 255, 1000);
+    led_flash(0, 0, 255, 250);
     buzz(2, 2, 512);
     Serial.println("Es hat an der Tür geklingelt!");
   } else if((char)payload[0] == 'o') {
-    led_flash(0, 255, 0, 1000);
+    led_flash(0, 255, 0, 250);
     buzz(1, 1, 1024);
     Serial.println("Zugelassen!");
   } else if((char)payload[0] == 'n') {
-    led_flash(255, 0, 0, 1000);
+    led_flash(255, 0, 0, 250);
     buzz(6, 6, 175);
     Serial.println("Abgelehnt!");
-  } else {
-    led_flash(255, 255, 255, 1000);
   }
   payload = 0;
 }
 
-//LED mit RGB-Wert blinken lassen
+//LEDs mit RGB-Wert blinken lassen
 void led_flash(byte red, byte green, byte blue, int ms) {
   analogWrite(led_R, red);
   analogWrite(led_G, green);
   analogWrite(led_B, blue);
+  for (int i = 0; i < 8; i++) {
+    strip.setPixelColor(i, red, green, blue);
+    strip.show();
+    delay(50);
+    strip.setPixelColor(i, 0, 0, 0);
+    strip.show();
+    delay(50);
+  } 
   delay(ms);
   analogWrite(led_R, 0);
   analogWrite(led_G, 0);
