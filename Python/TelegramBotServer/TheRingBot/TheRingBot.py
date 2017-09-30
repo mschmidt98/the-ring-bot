@@ -45,7 +45,8 @@ config = {"mqttip" : "172.16.0.1", "ringchannel" : "/theringbot/ring", "statusch
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
     update.message.reply_text('Hi')
-    regristrierteClients.append(update.message.chat_id)
+    status(bot, update)
+    #regristrierteClients.append(update.message.chat_id)
 
     
 def help(bot, update):
@@ -107,12 +108,23 @@ def on_message(client, userdata, msg):
 def ring(client, userdata, msg):
     global ChatNachricht
     if len(regristrierteClients) > 0:
-        if str(msg.payload.decode("ascii")[0] == 'k'):
+        if str(msg.payload.decode("ascii")[0]) == 'k':
             ChatNachricht = "Es hat an der Tür geklingelt"
+        
             for chat_id in regristrierteClients:
                 bot.send_message(chat_id=chat_id, text=ChatNachricht)
                 reply_keyboard = [['Öffne die Tür', 'Ich kann die Tür gerade nicht aufmachen', 'Keine Reaktion']]
                 bot.send_message(chat_id=chat_id, text='Was soll ich tun?', reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        
+        if str(msg.payload.decode("ascii")[0]) == 'o': 
+            ChatNachricht = "Es wird zur Tür gegangen"
+            for chat_id in regristrierteClients:
+                bot.send_message(chat_id=chat_id, text=ChatNachricht)
+        elif str(msg.payload.decode("ascii")[0]) == 'n':
+            ChatNachricht = "Es wird nicht zur Tür gegangen"
+            for chat_id in regristrierteClients:
+                bot.send_message(chat_id=chat_id, text=ChatNachricht)
+        
         
 
 def openDoor(client, userdata, msg):
