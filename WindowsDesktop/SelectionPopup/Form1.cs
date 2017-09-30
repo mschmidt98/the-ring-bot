@@ -19,29 +19,22 @@ namespace SelectionPopup
             pictureBox1.Image = Image.FromFile(imgPath);
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            WindowState = FormWindowState.Normal;
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-         
-        }
-
         private void Btn_Komme_Click(object sender, EventArgs e)
         {
             Program.SendToMQTT("o");
-            this.Close();
+            Close();
         }
 
 
         private void Btn_Nein_Click(object sender, EventArgs e)
         {
             Program.SendToMQTT("n");
-            this.Close();
+            Close();
         }
 
-        
+        private void Form1_Shown(object sender, EventArgs e)
+        {
+            Activate();
+        }
     }
 }

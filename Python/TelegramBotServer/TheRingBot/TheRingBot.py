@@ -113,30 +113,29 @@ def ring(client, userdata, msg):
                 bot.send_message(chat_id=chat_id, text=ChatNachricht)
                 reply_keyboard = [['Öffne die Tür', 'Ich kann die Tür gerade nicht aufmachen', 'Keine Reaktion']]
                 bot.send_message(chat_id=chat_id, text='Was soll ich tun?', reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-        elif str(msg.payload.decode("ascii")[0] == 'o'):
-            ChatNachricht = "Tür ist offen"
-            for chat_id in regristrierteClients:
-                bot.send_message(chat_id=chat_id, text=ChatNachricht)
-        elif str(msg.payload.decode("ascii")[0] == 'o'):
-            ChatNachricht = "Tür ist geschlossen"
-            for chat_id in regristrierteClients:
-                bot.send_message(chat_id=chat_id, text=ChatNachricht)
-
+        
 
 def openDoor(client, userdata, msg):
     message = msg.payload.decode("ascii").split(':')
-    if len(message)>1:
-        if str(message[0]) == 't':
+    
+    if str(message[0]) == 't':
+        if len(message)>1:
             ChatNachricht = "Die Tür wird von " + message[2] +" geöffnet"
-            client.publish(openingTopic, "t")
-        elif str(message[0]) == 'a':
-            ChatNachricht = message[2] + " kann die Tür nicht öffnen"
+        else:
+            ChatNachricht = "Die Tür wird geöffnet"            
+    elif str(message[0]) == 'a':
+        ChatNachricht = message[2] + " kann die Tür nicht öffnen"
+    elif str(message[0]) == 'o' :
+        ChatNachricht = "Tür ist offen"
+    elif str(message[0]) == 'z':
+        ChatNachricht = "Tür ist geschlossen"
 
-        for chat_id in regristrierteClients:
-            if int(message[1]) == chat_id:
-                bot.send_message(chat_id=chat_id, text="Nachricht wurde an die anderen Mitbewohner gesendet")
-            else:
-                bot.send_message(chat_id=chat_id, text=ChatNachricht)
+
+    for chat_id in regristrierteClients:
+        if str(message[0]) == 't' and len(message)>1 and (message[1]) == chat_id :
+            bot.send_message(chat_id=chat_id, text="Nachricht wurde an die anderen Mitbewohner gesendet")
+        else:
+            bot.send_message(chat_id=chat_id, text=ChatNachricht)
         
 
 def sendpic(client, userdata, msg):
