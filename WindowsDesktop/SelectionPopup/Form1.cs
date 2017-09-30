@@ -22,8 +22,6 @@ namespace SelectionPopup
         private void Form1_Load(object sender, EventArgs e)
         {
             WindowState = FormWindowState.Normal;
-            Focus();
-            FormClosing += Form1_FormClosing;
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
