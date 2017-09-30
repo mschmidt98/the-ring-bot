@@ -21,8 +21,6 @@ namespace SelectionPopup
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            WindowState = FormWindowState.Normal;
-            Focus();
             FormClosing += Form1_FormClosing;
         }
 
@@ -44,6 +42,9 @@ namespace SelectionPopup
             this.Close();
         }
 
-        
+        private void Form1_Shown(object sender, EventArgs e)
+        {
+            Activate();
+        }
     }
 }
