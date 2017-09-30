@@ -54,6 +54,7 @@
             this.Btn_Nein.TabIndex = 4;
             this.Btn_Nein.Text = "Ablehnen";
             this.Btn_Nein.UseVisualStyleBackColor = true;
+            this.Btn_Nein.Click += new System.EventHandler(this.Btn_Nein_Click);
             // 
             // pictureBox1
             // 

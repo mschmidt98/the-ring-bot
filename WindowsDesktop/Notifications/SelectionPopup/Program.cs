@@ -9,6 +9,9 @@ namespace SelectionPopup
 {
     class Program
     {
+        static bool IsAntwortMoeglich = false;
+        static string AktBild = "";
+
         static void Main(string[] args)
         {
             Application.EnableVisualStyles();
@@ -37,24 +40,31 @@ namespace SelectionPopup
 
         private static void ToastNotifier_ToastClicked(object sender, EventArgs e)
         {
-            Application.Run(new Form1("myimage.jpg"));
+            if (!IsAntwortMoeglich)
+                return;
+
+            Application.Run(new Form1(AktBild));
             
         }
         static void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
+            AktBild = "";
             var MessageContent = System.Text.Encoding.Default.GetString(e.Message);
 
-            string PicPfad = @"myimage.jpg";
+            AktBild = $@"myimage_{DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss")}.jpg";
 
-            if(e.Topic.Equals(" / theringbot/ring"))
+            if (e.Topic.Equals("/theringbot/ring"))
+            {
                 NotifyMeSempai("Benachrichtigung:", TranslateContent(MessageContent));
+            }
             if(e.Topic.Equals("/theringbot/pic"))
             {
-                var bytes = Convert.FromBase64String(MessageContent);
+                IsAntwortMoeglich = true;
 
-                File.WriteAllBytes(PicPfad, bytes);
+                var bytes = Convert.FromBase64String(MessageContent);
+                File.WriteAllBytes(AktBild, bytes);
                 
-                NotifyMeSempai("Benachrichtigung:", "Es klingelt!", Path.GetFullPath(PicPfad));
+                NotifyMeSempai("Benachrichtigung:", "Es klingelt!", Path.GetFullPath(AktBild));
 
             }
         }
@@ -74,14 +84,17 @@ namespace SelectionPopup
         {
             if (eingabe.Equals("k") || eingabe.Equals("K"))
             {
+                IsAntwortMoeglich = true;
                 return "Es klingelt";
             }
             else if (eingabe.Equals("o") || eingabe.Equals("O"))
             {
+                IsAntwortMoeglich = false;
                 return "Jemand ist Unterwegs";
             }
             else if (eingabe.Equals("n") || eingabe.Equals("N"))
             {
+                IsAntwortMoeglich = false;
                 return "Jemand hat Abgelehnt";
             }
             else
