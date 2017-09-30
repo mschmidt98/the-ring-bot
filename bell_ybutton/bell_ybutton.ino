@@ -20,10 +20,15 @@
  
 #include <ESP8266WiFi.h>
 
-int BUTTON_PIN = 5; 
+#define BUTTON_PIN  5
+#define LED         D0    
+
 const char* ssid = "Forum";
 const char* password = "HACK2017";
 const char* mqtt_server = "172.16.0.1";
+char * topic = "/theringbot/ring";
+
+
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -69,7 +74,7 @@ void reconnect() {
     {
       Serial.println("connected");
      //once connected to MQTT broker, subscribe command if any
-     // client.subscribe("/theringbot/ring");
+     // client.subscribe( topic );
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -81,12 +86,16 @@ void reconnect() {
 } //end reconnect()
 
 void setup() {
+
+  digitalWrite(LED, LOW);
+    Serial.begin(115200);
+    setup_wifi();
+  digitalWrite(LED, HIGH);
   
-  Serial.begin(115200);
-  setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
   pinMode(BUTTON_PIN,INPUT);
+
 }
 
 long lastActive = 0;
@@ -112,22 +121,23 @@ void loop() {
             char message[2];
             message[1] = 0;
             
-            if(now-lastActive > 10*1000 ){
-              
-              message[0] = 'k';
-              Serial.println(message);
-              
-              //publish sensor data to MQTT broker
-              client.publish("/theringbot/ring", message);
-              lastActive = now;
-            }
-          
+                if(now-lastActive > 10*1000 ){
+                  
+                  message[0] = 'k';
+                  Serial.println(message);
+                  
+                  //publish sensor data to MQTT broker
+                  client.publish( topic , message);
+                  lastActive = now;
+                    
+                }
+                          
           }
           
           lastStatus = 1;
-      }
-     else
-     {
+      
+      }else{
+       
           lastStatus  = 0;
      
      }
