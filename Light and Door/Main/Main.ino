@@ -14,6 +14,7 @@ PubSubClient client(espClient);
 void opening(char* topic, byte* payload, unsigned int length);
 void ring(char* topic, byte* payload, unsigned int length);
 void reset();
+char lastcommand = 'x';
 
 void setup() {
   strip.setBrightness(BRIGHTNESS);
@@ -63,13 +64,17 @@ void loop() {
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
-  if (strcmp(topic, "/theringbot/ring") == 0) {
-    ring(topic, payload, length);
+  if ((char)lastcommand != (char)payload[0]) {
+    if ((char)payload[0] != 'o'&& (char)payload[0] != 'z'){
+      lastcommand = (char)payload[0];
+    }
+    if (strcmp(topic, "/theringbot/ring") == 0) {
+      ring(topic, payload, length);
+    }
+    if (strcmp(topic, "/theringbot/opening") == 0) {
+      opening(topic, payload, length);
+    }
   }
-  if (strcmp(topic, "/theringbot/opening") == 0) {
-    opening(topic, payload, length);
-  }
-
 }
 void ring(char* topic, byte* payload, unsigned int length) {
   if ((char)payload[0] == 'k' || (char)payload[0] == 'K') {
@@ -133,9 +138,9 @@ void opening(char* topic, byte* payload, unsigned int length) {
 }
 
 void reset() {
-  for(int i = 0;  i < strip.numPixels(); i++ ){
-  strip.setPixelColor(i, strip.Color( 0, 0, 0));
-  strip.show();
+  for (int i = 0;  i < strip.numPixels(); i++ ) {
+    strip.setPixelColor(i, strip.Color( 0, 0, 0));
+    strip.show();
   }
 }
 
