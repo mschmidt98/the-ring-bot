@@ -23,9 +23,11 @@ namespace ImageDistributor
             RingClient = CreateClient("ring");
             PicClient = CreateClient("pic");
 
-            Console.WriteLine("Zum Beenden drücken Sie die Enter-Taste...");
+            Log("Service initialisiert.");
+            Log("Zum Beenden Enter drücken...");
             Console.ReadLine();
 
+            Log("Service wird beendet.");
             RingClient.Disconnect();
             PicClient.Disconnect();
         }
@@ -69,13 +71,25 @@ namespace ImageDistributor
             ToastNotifier.Show(message);
         }
 
+        /// <summary>
+        /// Gibt den Text mit der Zeit in der Konsole aus.
+        /// </summary>
+        /// <param name="message">Die anzuzeigende Nachricht.</param>
+        private void Log(string message)
+        {
+            string date = DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss");
+            Console.WriteLine(date + ": " + message);
+        }
+
         private void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
             var message = System.Text.Encoding.UTF8.GetString(e.Message);
             if (message != "k")
                 return;
 
+            Log("Es klingelt.");
             var response = GetLatestImageBytes();
+            Log("Bild wird zurückgesendet.");
             PicClient.Publish("/theringbot/pic", response);
         }
 
@@ -100,16 +114,16 @@ namespace ImageDistributor
 
                 var tempPath = Environment.GetEnvironmentVariable("tmp") + "\\LatestCamImg.jpg";
                 cl.DownloadFile(path, tempPath);
-                NotifyMeSempai("Nachricht erhalten", "Klingel-Nachricht angekommen.", tempPath);
+                //NotifyMeSempai("Nachricht erhalten", "Klingel-Nachricht angekommen.", tempPath);
 
                 var image = ImagePathToBase64(tempPath);
                 var bytes = System.Text.Encoding.UTF8.GetBytes(image);
 
                 return bytes;
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine("Fehler: " + e);
+                Log("Fehler beim Lesen des Bildes vom FTP.");
                 return null;
             }
         }
@@ -141,9 +155,9 @@ namespace ImageDistributor
 
                 return ftpAddress + nameArray[nameArray.Length - 1];
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine("Fehler: " + e);
+                Log("Fehler beim Lesen der Liste vom FTP.");
 
                 return null;
             }

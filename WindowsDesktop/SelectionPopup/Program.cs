@@ -52,10 +52,10 @@ namespace SelectionPopup
 
             AktBild = $@"myimage_{DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss")}.jpg";
 
-            if (e.Topic.Equals("/theringbot/ring"))
+            if (e.Topic.Equals("/theringbot/ring") && MessageContent.Equals("o"))
             {
                 IsAntwortMoeglich = false;
-                NotifyMeSempai("Benachrichtigung:", TranslateContent(MessageContent));
+                NotifyMeSempai("Benachrichtigung:", "Jemand anders geht zur Tür");
             }
             if(e.Topic.Equals("/theringbot/pic"))
             {
@@ -79,21 +79,9 @@ namespace SelectionPopup
             var message = new MessageItem(ueberschrift, inhalt,"",imgPfad);
             ToastNotifier.Show(message);
         }
-        static public string TranslateContent(string eingabe)
-        {
-            if (eingabe.Equals("k") || eingabe.Equals("K"))
-                return "Es klingelt";
-            else if (eingabe.Equals("o") || eingabe.Equals("O"))
-                return "Jemand ist Unterwegs";
-            else if (eingabe.Equals("n") || eingabe.Equals("N"))
-                return "Jemand hat Abgelehnt";
-            else
-                return "ERROR";
-        }
 
         public static void SendToMQTT(string antwort)
         {
-
             MqttClient Client = new MqttClient("172.16.0.1");
 
             // register to message received 

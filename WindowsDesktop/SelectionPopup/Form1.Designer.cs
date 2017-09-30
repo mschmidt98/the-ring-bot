@@ -37,10 +37,9 @@
             // Btn_Komme
             // 
             this.Btn_Komme.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Btn_Komme.Location = new System.Drawing.Point(16, 315);
-            this.Btn_Komme.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Btn_Komme.Location = new System.Drawing.Point(12, 256);
             this.Btn_Komme.Name = "Btn_Komme";
-            this.Btn_Komme.Size = new System.Drawing.Size(236, 107);
+            this.Btn_Komme.Size = new System.Drawing.Size(177, 87);
             this.Btn_Komme.TabIndex = 2;
             this.Btn_Komme.Text = "Komme";
             this.Btn_Komme.UseVisualStyleBackColor = true;
@@ -49,10 +48,9 @@
             // Btn_Nein
             // 
             this.Btn_Nein.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Btn_Nein.Location = new System.Drawing.Point(359, 318);
-            this.Btn_Nein.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Btn_Nein.Location = new System.Drawing.Point(269, 258);
             this.Btn_Nein.Name = "Btn_Nein";
-            this.Btn_Nein.Size = new System.Drawing.Size(236, 107);
+            this.Btn_Nein.Size = new System.Drawing.Size(177, 87);
             this.Btn_Nein.TabIndex = 4;
             this.Btn_Nein.Text = "Ablehnen";
             this.Btn_Nein.UseVisualStyleBackColor = true;
@@ -60,27 +58,24 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(16, 15);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox1.Location = new System.Drawing.Point(12, 12);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(579, 295);
+            this.pictureBox1.Size = new System.Drawing.Size(434, 240);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 5;
             this.pictureBox1.TabStop = false;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(611, 430);
+            this.ClientSize = new System.Drawing.Size(458, 349);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.Btn_Nein);
             this.Controls.Add(this.Btn_Komme);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Form1";
             this.Text = "Jemand steht an der Tür!";
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.Shown += new System.EventHandler(this.Form1_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
