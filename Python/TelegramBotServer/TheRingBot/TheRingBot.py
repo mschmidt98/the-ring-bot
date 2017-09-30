@@ -18,10 +18,12 @@ bot.
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
+import base64
 
 #!/usr/bin/env python
 import paho.mqtt.client as mqtt
 import time
+import os
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -93,11 +95,13 @@ def write(bot, update):
 
 #Reagieren auf neue Nachricht aus MQTT
 def on_message(client, userdata, msg):
-    print(str(msg.payload))
+    print(str(msg.payload[:50]))
     if msg.topic == ringTopic:
         ring(client, userdata, msg)
     elif msg.topic == openingTopic:
         openDoor(client, userdata, msg)
+    elif msg.topic == picTopic:
+        sendpic(client, userdata, msg)
 
 
 def ring(client, userdata, msg):
@@ -109,6 +113,14 @@ def ring(client, userdata, msg):
                 bot.send_message(chat_id=chat_id, text=ChatNachricht)
                 reply_keyboard = [['Öffne die Tür', 'Ich kann die Tür gerade nicht aufmachen', 'Keine Reaktion']]
                 bot.send_message(chat_id=chat_id, text='Was soll ich tun?', reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        elif str(msg.payload.decode("ascii")[0] == 'o'):
+            ChatNachricht = "Tür ist offen"
+            for chat_id in regristrierteClients:
+                bot.send_message(chat_id=chat_id, text=ChatNachricht)
+        elif str(msg.payload.decode("ascii")[0] == 'o'):
+            ChatNachricht = "Tür ist geschlossen"
+            for chat_id in regristrierteClients:
+                bot.send_message(chat_id=chat_id, text=ChatNachricht)
 
 
 def openDoor(client, userdata, msg):
@@ -116,6 +128,7 @@ def openDoor(client, userdata, msg):
     if len(message)>1:
         if str(message[0]) == 't':
             ChatNachricht = "Die Tür wird von " + message[2] +" geöffnet"
+            client.publish(openingTopic, "t")
         elif str(message[0]) == 'a':
             ChatNachricht = message[2] + " kann die Tür nicht öffnen"
 
@@ -125,7 +138,21 @@ def openDoor(client, userdata, msg):
             else:
                 bot.send_message(chat_id=chat_id, text=ChatNachricht)
         
-#def sendpic():
+
+def sendpic(client, userdata, msg):
+    foto = base64.b64decode(msg.payload.decode("ascii"))
+    try:
+        os.remove("img.jpeg")
+    except:
+        pass
+     
+    with open("img.jpeg", "wb") as fp:
+        fp.write(foto)    
+    for chat_id in regristrierteClients:
+        fp = open("img.jpeg", "rb")
+        bot.send_photo(chat_id, photo=fp, timeout=10)
+
+
 
 def listconfig(bot, update):
     global config
@@ -136,25 +163,25 @@ def listconfig(bot, update):
 
 def mqttip(bot, update):
     global config
-    eingabe = update.message.text.split(" ")
+    eingabe = update.message.text.split(" ")[1]
     config["mqttip"] = eingabe
 
 
 def ringchannel(bot, update):
     global config
-    eingabe = update.message.text.split(" ")
+    eingabe = update.message.text.split(" ")[1]
     config["ringchannel"] = eingabe
 
 
 def statuschannel(bot, update):
     global config
-    eingabe = update.message.text.split(" ")
+    eingabe = update.message.text.split(" ")[1]
     config["statuschannel"] = eingabe
 
 
 def picchannel(bot, update):
     global config
-    eingabe = update.message.text.split(" ")
+    eingabe = update.message.text.split(" ")[1]
     config["picchannel"] = eingabe
 
 
@@ -166,7 +193,8 @@ def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
 
     client.subscribe(ringTopic)
-    client.subscribe(openingTopic)     
+    client.subscribe(openingTopic)    
+    client.subscribe(picTopic)
                
 
 def main():
@@ -182,7 +210,7 @@ def main():
     dp.add_handler(CommandHandler("start",  start))
     dp.add_handler(CommandHandler("help",   help))
     dp.add_handler(CommandHandler("status", status))
-    dp.add_handler(CommandHandler("mqttip", status))
+    dp.add_handler(CommandHandler("mqttip", mqttip))
     dp.add_handler(CommandHandler("ringchannel", status))
     dp.add_handler(CommandHandler("statuschannel", status))
     dp.add_handler(CommandHandler("picchannel", status))
@@ -196,7 +224,7 @@ def main():
     client.on_connect = on_connect
     client.on_message = on_message
     
-    client.connect("172.16.0.1", 1883, 60)
+    client.connect(config["mqttip"], 1883, 60)
 
     # Start the Bot
     updater.start_polling()
