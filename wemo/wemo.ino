@@ -45,7 +45,7 @@ void setup()
     // Define your switches here. Max 14
     // Format: Alexa invocation name, local port no, on callback, off callback
     eingangstuer = new Switch("eingangstuer", 80, eingangstuerON, eingangstuerOff);
-    gehelos = new Switch("eingangstuerauf", 81, gehelosOn, gehelosOff);
+    gehelos = new Switch("oeffnen", 81, gehelosOn, gehelosOff);
     ablehnen = new Switch("test", 82, ablehnenOn, ablehnenOff);
 
     Serial.println("Adding switches upnp broadcast responder");
