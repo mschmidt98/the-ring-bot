@@ -11,19 +11,20 @@ namespace SelectionPopup
     {
         static bool IsAntwortMoeglich = false;
         static string AktBild = "";
+        static bool running = false;
 
         static void Main(string[] args)
         {
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
             ToastNotifier.Init("Tür-Cam");
             ToastNotifier.ToastClicked += ToastNotifier_ToastClicked;
-
             Subscribe();
         }
 
-        static public void Subscribe()
+        public static async void Subscribe()
         {
             MqttClient Client = new MqttClient("172.16.0.1");
 
@@ -35,7 +36,17 @@ namespace SelectionPopup
             if (!Client.IsConnected)
                 NotifyMeSempai("Fehler!:", "Verbindung fehlgeschlagen");
 
-            Client.Subscribe(new string[] { "/theringbot/ring", "/theringbot/pic", "/theringbot/opening" }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+            while (true)
+            {
+                while (!running)
+                {
+                    Client.Subscribe(new string[] { "/theringbot/ring", "/theringbot/pic", "/theringbot/opening" }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+                    running = true;
+                }
+
+                await System.Threading.Tasks.Task.Delay(1000);
+            }
+
         }
 
         private static void ToastNotifier_ToastClicked(object sender, EventArgs e)
@@ -57,13 +68,13 @@ namespace SelectionPopup
                 IsAntwortMoeglich = false;
                 NotifyMeSempai("Benachrichtigung:", "Jemand anders geht zur Tür");
             }
-            if(e.Topic.Equals("/theringbot/pic"))
+            if (e.Topic.Equals("/theringbot/pic"))
             {
                 IsAntwortMoeglich = true;
 
                 var bytes = Convert.FromBase64String(MessageContent);
                 File.WriteAllBytes(AktBild, bytes);
-                
+
                 NotifyMeSempai("Benachrichtigung:", "Es klingelt!", Path.GetFullPath(AktBild));
             }
             if (e.Topic.Equals("/theringbot/opening") && MessageContent[0].Equals('t'))
@@ -71,17 +82,17 @@ namespace SelectionPopup
                 IsAntwortMoeglich = false;
                 NotifyMeSempai("Benachrichtigung:", "Die Tür wird geöffnet");
             }
+            running = false;
         }
 
         static public void NotifyMeSempai(string ueberschrift, string inhalt)
         {
             var message = new MessageItem(ueberschrift, inhalt);
-            ToastNotifier.Show(message);
         }
 
         static public void NotifyMeSempai(string ueberschrift, string inhalt, string imgPfad)
         {
-            var message = new MessageItem(ueberschrift, inhalt,"",imgPfad);
+            var message = new MessageItem(ueberschrift, inhalt, "", imgPfad);
             ToastNotifier.Show(message);
         }
 
