@@ -144,7 +144,7 @@ def openDoor(client, userdata, msg):
 
 
     for chat_id in regristrierteClients:
-        if str(message[0]) == 't' and len(message)>1 and (message[1]) == chat_id :
+        if str(message[0]) == 't' and len(message)>1 and int(message[1]) == chat_id :
             bot.send_message(chat_id=chat_id, text="Nachricht wurde an die anderen Mitbewohner gesendet")
         else:
             bot.send_message(chat_id=chat_id, text=ChatNachricht)
