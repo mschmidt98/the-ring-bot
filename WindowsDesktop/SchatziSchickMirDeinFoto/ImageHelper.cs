@@ -89,8 +89,16 @@ namespace ImageDistributor
 
             Log("Es klingelt.");
             var response = GetLatestImageBytes();
-            Log("Bild wird zurückgesendet.");
-            PicClient.Publish("/theringbot/pic", response);
+
+            if(response == null)
+            {
+                Log("Es wird kein Bild gesendet.");
+            }
+            else
+            {
+                Log("Bild wird zurückgesendet.");
+                PicClient.Publish("/theringbot/pic", response);
+            }
         }
 
         /// <summary>
@@ -114,7 +122,6 @@ namespace ImageDistributor
 
                 var tempPath = Environment.GetEnvironmentVariable("tmp") + "\\LatestCamImg.jpg";
                 cl.DownloadFile(path, tempPath);
-                //NotifyMeSempai("Nachricht erhalten", "Klingel-Nachricht angekommen.", tempPath);
 
                 var image = ImagePathToBase64(tempPath);
                 var bytes = System.Text.Encoding.UTF8.GetBytes(image);
@@ -123,7 +130,7 @@ namespace ImageDistributor
             }
             catch
             {
-                Log("Fehler beim Lesen des Bildes vom FTP.");
+                Log("Fehler beim Lesen des Bildes vom FTP-Server.");
                 return null;
             }
         }
@@ -151,6 +158,13 @@ namespace ImageDistributor
                 response.Close();
 
                 var nameArray = names.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (names.Length == 0)
+                {
+                    Log("Keine Dateien auf dem FTP-Server gefunden.");
+                    return null;
+                }
+
                 Array.Sort(nameArray);
 
                 return ftpAddress + nameArray[nameArray.Length - 1];
@@ -158,7 +172,6 @@ namespace ImageDistributor
             catch
             {
                 Log("Fehler beim Lesen der Liste vom FTP.");
-
                 return null;
             }
         }
@@ -166,7 +179,7 @@ namespace ImageDistributor
         /// <summary>
         /// Lädt das Bild des angegebenen Pfads und wandelt es in Base64 um.
         /// </summary>
-        /// <param name="imagePath"></param>
+        /// <param name="imagePath">Der absolute Speicherpfad des Bildes.</param>
         /// <returns></returns>
         private string ImagePathToBase64(string imagePath)
         {
