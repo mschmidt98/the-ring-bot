@@ -35,7 +35,7 @@ namespace SelectionPopup
             if (!Client.IsConnected)
                 NotifyMeSempai("Fehler!:", "Verbindung fehlgeschlagen");
 
-            Client.Subscribe(new string[] { "/theringbot/ring", "/theringbot/pic" }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+            Client.Subscribe(new string[] { "/theringbot/ring", "/theringbot/pic", "/theringbot/opening" }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
         }
 
         private static void ToastNotifier_ToastClicked(object sender, EventArgs e)
@@ -65,6 +65,11 @@ namespace SelectionPopup
                 File.WriteAllBytes(AktBild, bytes);
                 
                 NotifyMeSempai("Benachrichtigung:", "Es klingelt!", Path.GetFullPath(AktBild));
+            }
+            if (e.Topic.Equals("/theringbot/opening") && MessageContent[0].Equals('t'))
+            {
+                IsAntwortMoeglich = false;
+                NotifyMeSempai("Benachrichtigung:", "Die Tür wird geöffnet");
             }
         }
 
