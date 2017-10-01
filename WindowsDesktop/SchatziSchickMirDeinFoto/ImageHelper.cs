@@ -162,10 +162,14 @@ namespace ImageDistributor
 
                 var nameArray = names.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
-                if (names.Length == 0)
+                if (nameArray.Length == 0)
                 {
                     Log("Keine Dateien auf dem FTP-Server gefunden.");
                     return null;
+                }
+                else
+                {
+                    Log(nameArray.Length + " Bilder auf dem FTP-Server gefunden.");
                 }
 
                 Array.Sort(nameArray);
