@@ -83,22 +83,25 @@ namespace ImageDistributor
 
         private void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
-            var message = System.Text.Encoding.UTF8.GetString(e.Message);
+            var message = GetString(e.Message);
             if (message != "k")
                 return;
 
             Log("Es klingelt.");
             var response = GetLatestImageBytes();
 
-            if(response == null)
+            if (response == null)
             {
-                Log("Es wird kein Bild gesendet.");
+                Log("Dummy-Bild wird gesendet.");
+                var dummy = ImagePathToBase64("Fehlgeschlagen.png");
+                response = GetBytes(dummy);
             }
             else
             {
                 Log("Bild wird zurückgesendet.");
-                PicClient.Publish("/theringbot/pic", response);
             }
+
+            PicClient.Publish("/theringbot/pic", response);
         }
 
         /// <summary>
@@ -124,7 +127,7 @@ namespace ImageDistributor
                 cl.DownloadFile(path, tempPath);
 
                 var image = ImagePathToBase64(tempPath);
-                var bytes = System.Text.Encoding.UTF8.GetBytes(image);
+                var bytes = GetBytes(image);
 
                 return bytes;
             }
@@ -174,6 +177,16 @@ namespace ImageDistributor
                 Log("Fehler beim Lesen der Liste vom FTP.");
                 return null;
             }
+        }
+
+        private byte[] GetBytes(string text)
+        {
+            return System.Text.Encoding.UTF8.GetBytes(text);
+        }
+
+        private string GetString(byte[] bytes)
+        {
+            return System.Text.Encoding.UTF8.GetString(bytes);
         }
 
         /// <summary>

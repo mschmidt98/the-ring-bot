@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Fehlgeschlagen.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="M2MqttDotnetCore" Version="1.0.7" />
     <PackageReference Include="ZKWeb.System.Drawing" Version="4.0.0" />
   </ItemGroup>
