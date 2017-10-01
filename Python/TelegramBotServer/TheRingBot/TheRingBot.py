@@ -97,6 +97,10 @@ def write(bot, update):
 #Reagieren auf neue Nachricht aus MQTT
 def on_message(client, userdata, msg):
     print(str(msg.payload[:50]))
+    
+    if len(msg.payload) == 0:
+        return
+
     if msg.topic == ringTopic:
         ring(client, userdata, msg)
     elif msg.topic == openingTopic:
