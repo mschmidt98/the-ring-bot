@@ -287,7 +287,7 @@ def main():
     global bot, client
 
     # Create the EventHandler and pass it your bot's token.
-    updater = Updater("479238432:AAH16mDXaHlnqa0lwog398OePSvL-ouEdb0")
+    updater = Updater("") # Key removed for security purpose
     bot = updater.bot
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
